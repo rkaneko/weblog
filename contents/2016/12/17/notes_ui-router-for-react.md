@@ -83,3 +83,32 @@ const ToPerson = (props) => {
   );
 };
 ```
+
+> あるstateから別のstateにスウィッチすることをTransitionと呼ぶ.
+
+## Nested States
+
+UI-Router statesは単一のroot stateから始まるTreeを形成する.root stateは暗黙的で名前を持たない.top-levelのアプリケーションstateは暗黙的なroot stateの子供となる.
+
+例えばpeople stateの子であるperson stateを次のように書き換えられる.
+
+```diff
+const person = {
+-  name: 'person',
+-  url: '/people/:personId',
++  name: 'people.person',
++  url: '/:personId',
+  component: Person,
+  reolve: [{
+    token: 'person',
+-    deps: ['$transition$'],
++    deps: ['$transition$', 'people']
+-    resolveFn: (trans) => PeopleService.getPerson(trans.params().personId)
++    resolveFn: (trans, people) => people.find(person => person.id === trans.params().personId)
+  }]
+}
+```
+
+### State name
+
+`someStateName.anotherOneName`は`someStateName`の名前を持つstateと`anotherOneName`を名前に持つstateに親子関係を形成する.

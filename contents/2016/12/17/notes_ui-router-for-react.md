@@ -112,3 +112,17 @@ const person = {
 ### State name
 
 `someStateName.anotherOneName`は`someStateName`の名前を持つstateと`anotherOneName`を名前に持つstateに親子関係を形成する.
+
+### URL
+
+親子関係を作ると,URLも親のstate urlからの相対urlで記述できる.
+
+### Resolve
+
+前提として,`person` stateの前には`people` stateにおいてserver APIから`peopel`を取得してから,その後で`person` stateに遷移する.routerは`person` stateをアクティベイトする前に`person` resolveを呼び出す.しかし,ここでの操作では少し異なっていて,`people` stateから取得していたデータを`person`のresolveにinjectしてからそのデータを利用する.サーバにfetchはしない.親のresolveによりpeopleリストが既にロード済みなため,追加のfetchが必要ない.
+
+> resolve関数では,親stateや同一stateのresolveの結果をinjectすることもある.
+
+### View
+
+

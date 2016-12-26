@@ -163,4 +163,68 @@ see also
 - define-dispose.js
 
 ---
+# Observer
+
+`Observer`は`Observable`から送信された値に対するConsumer.
+
+Observerは
+
+- `next`
+- `error`
+- `complete`
+
+Observableから送信された各typeの値のcallbackを持つObject.部分的な定義も可能.
+
+```js
+const observer = {
+  next: x => console.log(`Observer got a next value: ${x}`),
+  error: err => console.error(`Observer got an error: ${err}`),
+  complete: () => console.log(`Observer got a complete notification`),
+};
+```
+
+仮に,`Observable.subscribe()`の引数にObserverとしてのObjectではなく,functionを渡した場合は,subscribe内で引数で受け取ったfunctionをnext notificationを受け取るcallbackとしてobserver Objectを生成する.また,3つのtypeに対するcallbackをすべて関数として渡すこともできる.
+
+---
+# Subscription
+
+`Subscription`は
+
+- 破棄可能なリソースで通常は実行中のObservableを表現するObject.
+- Subscriptionが保持するリソースの解放や,実行中のObservableをキャンセルするための`unsubscribe` function(引数を取らない)を持つ.
+
+```js
+const observable = Rx.Observable.interval(1000);
+const subscription = observable.subscribe(x => console.log(x));
+// later
+subscription.unsubscribe();
+```
+
+リソースを明示的に解放する必要がある場合は,`Observable.create`に渡すsubscribe functionの戻り値にリソース解放のための関数を返すようにする.
+
+see also
+
+- define-dispose.js
+
+subscriptionは親子関係を定義することもできる.
+
+```js
+const subscription = observable1.subscribe(x => console.log(x));
+const childSubscription = observable2.subscribe(x => console.log(x));
+
+subscription.add(childSubscription);
+
+setTimeout(() => {
+    // unsubscribe parent and child subscription
+    subscription.unsubscribe();
+}, 1000);
+```
+
+see also
+
+- unsubscribe-multi-subscription.js
+
+`Subscription.add(otherSubscription)`で定義した関係をundoするために`Subscription.remove(otherSubscription)`がある.
+
+---
 

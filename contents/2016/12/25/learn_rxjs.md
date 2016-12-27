@@ -227,4 +227,56 @@ see also
 `Subscription.add(otherSubscription)`で定義した関係をundoするために`Subscription.remove(otherSubscription)`がある.
 
 ---
+# Subject
 
+`Subject`は特別なtypeの`Observable`.
+
+- 複数のObserverに対し値を送信できる.
+- EventEmitterのようなもので,複数のlistenerを管理する.
+- `Subject.subscribe`は`Observable.subscribe`とは異なり,値を送信する新しい実行呼び出しではなく,Observer listに新たなObserverを登録するのみ.(`addListener`のようなもの.)
+- すべてのSubjectはObservableでもあり,Observerでもある.
+  - `next(v)`,`error(e)`,`complete()`メソッドを持つ.
+  - Subjectに対し新しい値を与えるには,`next(theValue)`メソッドを呼ぶ.これにより,SubjectをlistenしているすべてのObserverに対しマルチキャストされる.
+
+マルチキャストの例
+
+see also
+
+- multicast-to-observers.js
+
+SubjectはObserverでもあるので`Observable.subscribe`の引数として渡すこともできる.
+これにより,ひとつのObserverへのキャストから複数のObserverに対してSubjectを介してマルチキャストすることへの変更も可能となる.
+
+Subject typeには,より特化した`BehaviorSubject`,`ReplaySubject`,`AsyncSubject`がある.
+
+## Multicasted Observables
+
+Observable, Subject, 複数のObserversによるマルチキャストの仕組みは以下の通り.
+
+- 複数のObserverはSubjectに対しsubscribeする.
+- SubjectはsourceとなるObservableをsubscribeする.
+
+マルチキャストを実現する方法は2つある.
+
+- `Observable.subscribe(subject)`を使う.
+- `Observable.subscribe(subject)`を内部的に実行する`ConnectableObservable.connect()`を使う.
+
+`multicast()`はsubscribeされたときにSubjectのように複数のObserverにキャストする振舞いを行う`ConnectableObservable`を返す.
+
+`ConnectableObservable.connect()`は`Subscription`を返すのでshared Observable executionをキャンセルするために`Subscription.unsubscribe`を呼び出す.
+
+see also
+
+- multicasted-observable.js
+
+### Reference counting
+
+`ConnectableObservable.connect()`を明示的に呼び出して,Subscriptionをハンドリングするのは扱いづらいケースもある.最初のObserverが到達したら自動的にconnectされ,最後のObserverがunsubscribeしたらshared executionを自動的にキャンセルしたいというのが一般的.
+
+`Observable.refCount()`を使うと,上記の要件を満たす実装が可能.
+
+see also
+
+- refcount.js
+
+---

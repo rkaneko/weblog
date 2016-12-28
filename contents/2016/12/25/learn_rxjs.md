@@ -311,3 +311,61 @@ see also
 - async-subject.js
 
 ---
+
+# Operators
+
+RxJSで核となるのはObservableだが,operatorsのおかげで複雑な非同期処理もコンポーザブルで宣言的な書き方が可能になる.
+
+## What are opeartors?
+
+operatorsはObservableのメソッド(map, filter, merge, etc).呼び出されるとObservableインスタンスに副作用を与えるのではなく新しいObservableインスタンスが返される(pure function).
+
+基本的な考え方は,inputとしてObservableを受け取り,inputをSubscribeする新たなObservableを生成してoutputとして返す.
+
+see also
+
+- operators-example.js
+
+## Instance operators versus static operators
+
+instance methodはわかりやすい.
+
+```js
+Rx.Observable.prototype.multiplyByTen = function multiplyByTen() {
+  const input = this;
+  return Rx.Observable.create(function subscribe(observer) {
+    input.subscribe({
+      next: v => observer.next(10 * v),
+      error: err => observer.error(err),
+      complete: () => observer.complete()
+    });
+  });
+}
+
+const observable = Rx.Observable.from([1, 2, 3, 4]).multiplyByTen();
+observable.subscribe(x => console.log(x));
+```
+
+static methodはObservable classにアタッチされるpure functionのこと.例としては,`interval`のようにミリ秒ごとに値をemitするようなものが挙げられる.
+
+```js
+var observable = Rx.Observable.interval(1000);
+```
+
+`interval`や`create`のようなObservableを生成するようなメソッドが異なる性質を持つstatic methodもある.`merge`や`combineLatest`,`concat`のように引数として複数のObservableをとるようなメソッドもある.
+
+## Marble diagrams
+
+Observableの実行系列やoperatorsによるinput/outputの変化等を見るためにはmarble diagramsが表現しやすい.
+
+see also:
+
+http://reactivex.io/rxjs/manual/asset/marble-diagram-anatomy.svg
+
+## Choose an operator
+
+どのoperatorsを使えばよいかを探す方法として以下を使うと良い.
+
+- http://reactivex.io/rxjs/manual/overview.html#choose-an-operator
+
+---

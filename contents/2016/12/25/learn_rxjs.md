@@ -280,3 +280,34 @@ see also
 - refcount.js
 
 ---
+
+## BehaviorSubject
+
+"the current value"という概念をもつSubject.Consumerにemitした値を"the current value"として保持し,新しいObserverが増えた時は即座に"the current value"をObserverは受け取ることができる.
+
+see also
+
+- behavior-subject.js
+
+## ReplaySubject
+
+old valuesとしてObservable executionの一部を保持しておくことができる.
+
+- buffer sizeで固定長の値を保持.
+- window timeをミリ秒単位で保持時間を指定する.
+
+see also
+
+- window-time-replay-subject.js
+
+## AsyncSubject
+
+`AsyncSubject`はObservable executionの最後の値のみが,`AysncSubject.complete()`が呼ばれた時に送信される.
+
+AsyncSubjectは`last()` operatorに似ている.
+
+see also
+
+- async-subject.js
+
+---

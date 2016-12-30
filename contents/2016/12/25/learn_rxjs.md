@@ -369,3 +369,49 @@ http://reactivex.io/rxjs/manual/asset/marble-diagram-anatomy.svg
 - http://reactivex.io/rxjs/manual/overview.html#choose-an-operator
 
 ---
+# Scheduler
+
+Schedulerはsubscriptionがいつ開始するか,通知がいつ送信されるかを管理するもの.
+
+次の3のコンポーネントから成る.
+
+- data structure: 優先度や他の基準を基にしてどのようにtaskを保持したりキューイングしたりするかを責務とする.
+- execution context: いつどこでtaskが実行されるかを示す.(e.g.即時実行,setTimeoutやprocess.nextTickやanimation frameといったコールバックにおける実行)
+- (virtual) clock: `now()`によって"time"の概念を提供する.特定のSchedulerによってスケジューリングされたtaskはclockで示されるtimeにのみ従って実行される.
+
+SchedulerはObservableがObserverに対しどのような実行コンテキストで通知を送信するかを定義するためのもの.
+
+サンプルでは,1,2,3という値を同期的にひとつのObservableがemitし,emitする値を送信するための`async` schedulerを指定している.
+
+see also
+
+- how-do-you-define-execution-context.js
+
+`Rx.Scheduler.async.schedule()`メソッドを使用することでSchedulerが内部にもつclockで管理される時間によってdelayを実現することもできる.
+
+## Scheduler Types
+
+|Scheduler | Purpose |
+|:---|:---|
+|null|scheduleｒを何も指定しなければ,通知は同期的かつ再帰的に送信される.固定時間の操作や再帰的な操作に使用する.|
+|Rx.Scheduler.queue|現在のイベントフレームにおけるqueueをスケジューリングする.繰り返し操作のために使用する.|
+|Rx.Scheduler.asap|とても小さなtask queueをスケジューリングする.Node.jsのprocess.nextTick()やWeb Worker MessageChannelやsetTimeout等の利用可能な最速の送信メカニズムを使用する.非同期での対話に使用する.|
+|Rx.Scheduler.async|setIntervalを使ってスケジュールが動作する.時間を指定したいような操作で使用する.|
+
+## Using Schedulers
+
+Schedulerとしてどのタイプのもの使うかを明示的に指定することなくSchedulerを使用することもできる.
+
+並列処理を扱えるすべてのObservable operatorsはoptionalなSchedulerを持っている.もしSchedulerを指定しなければRxJSは最低並列処理の原則に従ってデフォルトのSchedulerを選択する.これにより使用されるoperatorの要件を満たす最小の並列度をSchedulerは選択するということを意味する.例えば大量で無限のメッセージを返すようなoperatorに対してはqueueタイプのSchedulerが使用され,時間を使用するようなoperatorの場合にはasyncタイプのSchedulerが選択されたりする.
+
+パフォーマンスを最適化したい場合に,デフォルトとは異なるタイプのSchedulerを選択することができる.
+
+static creation operatorは`from(array, scheduler)`のように引数にSchedulerを取れることが一般的な設計になっている.
+
+`Observable.subscribe()`は同期的かつ即座にObservableが発生する.`Observable.subscribeOn()`の引数としてschedulerを指定するとどんなコンテキストでsubscribeするかをスケジューリングすることができる.
+
+`Observable.observeOn()`はどのようなコンテキストで通知が送信されるかをスケジューリングすることができる.source Observableとdestination Observerの間のmediatorが指定されたSchedulerを使ってdestination Observerをコールする.
+
+`bufferTime`や`debounceTime`,`throttleTime`,`timeInterval`といった時間に関連するObservable instance methodも引数にSchedulerタイプを指定することができる.デフォルトは`Rx.Observable.async`となっている.
+
+ReplaySubjectも時間を扱うのでSchedulerを指定することができる.デフォルトは与えられたclockに対してqueue Schedulerを試用する.

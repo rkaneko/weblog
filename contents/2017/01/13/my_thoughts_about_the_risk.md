@@ -6,7 +6,8 @@
 このことについて考えるときに僕が影響を受けたは次の言葉.
 
 > Risk comes from not knowing what you're doing. 
->    --- Wallen Edward Buffett
+>
+>    --- Warren Edward Buffett
 
 自分が何をしているのか知らないことからリスクは生まれる.
 

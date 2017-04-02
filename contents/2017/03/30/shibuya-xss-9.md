@@ -39,6 +39,8 @@ Shibuya.XSS techtalk #9
 
 # XSSフィルターの使い方
 
+- https://speakerdeck.com/masatokinugawa/shibuya-dot-xss-techtalk-number-9
+
 - XSSフィルターの基本
   - ページを書き換えることによりXSSを防ぐ
   - XSSフィルター,Auditor,FFではoScriptNを使うと同等
@@ -51,6 +53,8 @@ Shibuya.XSS techtalk #9
 - X-XSS-Protectionヘッダは1以外を利用しよう
 
 # WebセキュリティとW3CとIETFの仕様
+
+- https://www.slideshare.net/yuki-f/web-w3cietf
 
 - W3C
   - Web Application Security WG

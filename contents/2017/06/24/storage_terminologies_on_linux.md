@@ -5,6 +5,12 @@ LinuxにおけるStorageにまつわる用語整理
 
 Block deviceはある大きさのブロック単位で、ランダムにデータの読み書きを行えるデバイス。ハードディスクやUSBメモリやCD-ROMなどのディスク装置全般がBlock device。
 
+Linuxでは以下のコマンドでブロックデバイスをリストできる。
+
+```bash
+$ lsblk
+```
+
 # filesystem
 
 filesystemはBlock deviceにおけるデータ操作(読み書き)を行うためのOSの機能。

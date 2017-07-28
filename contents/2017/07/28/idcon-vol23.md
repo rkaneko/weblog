@@ -1,0 +1,179 @@
+#idcon vol.23
+===
+
+# Credential Management API by @agektmr
+
+- パスワードがもれないようにするには?
+  - one-time
+  - complecity
+  - 使いまわさない
+  - ユーザの啓蒙
+  - password manager
+  - onepassword
+  - passwordを覚えるのは人間には苦痛
+  - passwordを使わないのが理想
+  - identity/social login
+- goals
+  - 強いクレデンシャル
+  - password manager
+  - 優れたUX
+- Smart Lock for Password
+  - Android native app向け
+  - Chromeのpassword managerを利用して、Nativeでログインできる e.g. Netflix
+- Credential Management API
+  - Chromeで先行実装
+  - Web標準化に向けWIP
+  - Firefox, Safariで実装予定, Webkitも
+  - JavaScriptでクレデンシャル情報を操作
+  - ワンタップログイン
+    - 複数アカウントがある場合は選択、１つのときは即ログイン
+    - ログアウト時に自動ログインの制御もできる
+    - AliExpress
+      - Credential Management APIを使うことでログイン率41%Up
+      - ログイン失敗率85%Down
+  - Usage
+    - クレデンシャルを保存する
+    - social loginの場合はtokenではなく、どのアカウントでログインしたかを保存する
+  - サブドメインをまたいだクレデンシャルの共有
+    - Same originではないと基本脆弱性
+    - SSOしたい場合があるのでサブドメインが同じであればOKになった
+  - Top level domain(TLD)をまたいだクレデンシャルの共有
+    - Digital Asset Links
+      - ドメイン間の関係を定義してあげることでドメイン間でのクレデンシャルの共有ができるようになる
+    - ニーズは国ごとに違うドメイン(google.com, google.co.jp)を持っている会社からなので想定ユースケースはこれ
+      - このユースケース以外においてパスワードの使い回すための仕組みではない
+- CM APIではgoalsの強いクレデンシャルを満たせない
+- そこでSign Up API
+  - ユーザが過去にログインに使用したアカウントを選択させる
+  - Google accountを選択した場合は、GoogleとOIDCでfederationしてtokenを取得する
+  - 現在Identity Teamでプロプライエタリ環境でJS実装中
+  - 試したい方は専用Formに登録すると先行実験利用できるかも
+- Openさ
+  - 紹介したAPIはGoogleのPassword managerに依存している
+- `navigation`のnamespace以下に、Credential Management APIの他にWeb Authentication APIも実装される?
+  - Web Authentication APIはMSでやっているFIDOをJSのInterfaceを定義してW3Cに持って行っているもの
+  - https://blogs.msdn.microsoft.com/tsmatsuz/2016/06/08/w3c-web-authentication-api-javascript/
+
+# Payment Request API by @agektmr
+
+- Why Web Payments?
+  - よりよいUX
+  - 手軽に実装できる
+  - 新しいecosystem
+- 問題提起
+  - フォームにクレカ番号を入力してサブミット
+  - mobileでフォームに入力するのは苦痛 -> 滅びて欲しい
+- Payment Request API
+  - 支払いのためのWeb兵十ン
+  - 支払い専用にブラウザネイティブの一貫したUIを提供
+  - それ自体は支払い処理はしない
+  - ブラウザのauto-fillを活用できる
+  - アプリもしくは別のWeb sitesと連携して支払いを行う仕組みを実現する
+- Usage
+  - `methods`: Payment Method Identifiers
+    - basic-cardを指定するとブラウザに登録されている生のクレカ情報を使う
+    - URL: Payment Apps (Android Pay, AliPay,, Samsung Pay)
+  - `details`: 商品詳細情報
+    - 配送方法なども指定できる
+  - `options`: オプション
+    - `requestShipping`: `boolean` 住所を指定できるオプション
+    - `requestpayermail`
+- 決済代行業者(PSP)との連携について
+  - 今後PSPごとにPayments APIを使う場合のガイドラインなどが発表されていくようになるかもだけどまだその段階にはない
+  - 2020年までにクレジットカードを悪用された犯罪を減らしていく国の取り組みがある
+  - 基本はクレジットカード情報を非保持
+  - もし、保持する場合はPCI DSSに準拠する必要がある
+    - 400弱のチェック項目がある
+    - これを各サービスが準拠するのは難しい
+    - そこでPSP
+  - PCIの種類
+    - PCI DSS
+    - PCI SAQ A-EP　チェック項目は約200。
+    - PCI SAQ A: 最っも簡単なモノ。チェック項目は約20。
+    - EC sitesがPCI DSSを準拠することは少ない
+  - PSPとMerchantとBrowserの連携
+    - 簡単な方法は,リンク型
+      - iframeやlinkを使ってPSPが提供しているフォームを組み込む
+      - こうすることによりカード情報が非保持になるのでPCI SAQ Aを満たせば良いだけになる→できそう！
+　　- トークン型
+      - PCI SAQ A or A-EP
+  - Tokenization
+    - カード番号の代わりにそのトランザクションでだけ使えるトークンと呼ばれる文字列を発行
+    - カード番号そのものをハッシュや暗号化したものではないので不可逆
+    - 他の目的で転用でいないため、漏洩しても被害は最小限。
+    - トークンを使うことでPCI DSS適用範囲を縮小できる(SAQ A)。
+    - これをどうやってWebに組み込めばよいか?
+  - ネイティブペイメントアプリ
+    - プラットフォーム依存の仕様
+    - bobpay.xyz
+      - Integration Guide
+    - Androiid Chrome 60~
+    - 登場予定
+      - Alipay
+      - Samsung Pay
+      - これらはMerchantが使うものを指定し、ユーザに選択してもらう
+  - Payment Request APIとペイメントアプリの連携
+    - Browserがネイティブペイメントアプリを経由してトークンを取得する
+    - トークン発行をrequestするとPayment request APIにtokenが戻ってくる
+    - これによりMerchantはクレカ情報に触れなくてよくなる
+  - Pay with Google
+  - ウェブペイメントアプリ
+    - native paymenet appはユーザがinstallしてないと使えない
+    - 標準化進行中: Payment Handler API
+    - Web Payment AppsはService Workerを使う
+    - Service Workerを使って、Web sitesを開いていなくても、token発行イベントを出してWev Payment Apps経由でtokenを取得できる
+  - Browser compatibility
+    - Chrome for Android
+    - Chrome for Desktop 61~
+    - Chrome for iOS
+    - Samsung Internet Browser
+    - Microsoft Edge
+    - Mozilla Firefox
+    - Facebook
+    - iOS SafariではApple PayのApple Pay JSで似たようなことを実現できる
+    - WebkitではPayment RequestはUnder consideration
+    - g.co/PaymentRequestAPI
+- Payment Request APIを使える条件は?
+  - https必須
+- 入力内容によって送料を変えるといったことはできるか?
+  - 入力内容が更新されるとイベントが飛ぶので、よしなにできる
+- どの粒度でsites間、端末間で情報を同期できる?
+  - 住所は同期される
+  - クレカ情報は基本同期されない
+    - ただしGoogle Paymentsに保存されているクレカ情報はChromeから読める
+- WebViewを使うと各アプリから触れますよね?
+  - 正確にはChrome custom tab。これをChromeが立ち上げる。
+
+# クレカの Tokenization by @keketa
+
+- PAY.JP
+- PAY ID
+- What's tokenization?
+  - カード番号を他のデータに置い変えて処理を行うこと
+- Why tokenization?
+  - カード情報事故増加によるセキュリティニーズの高まり
+  - 実行計画2017
+  - Android Pay/Apple PayなどセキュリティとUXを向上されるサービスの登場
+- PCI-DSS
+  - カードブランド各社によって設立された
+  - 訪問監査
+  - SAQ
+    - 訪問監査なし、自己問診んにより準拠を証明する方法
+- Tokenization分類
+  - 可逆・不可逆
+  - 1度きり・複数回利用可
+  - ブランド・アクワイアラ・イシュア・共同NW・PSPにそれぞれ役割がある
+- CDE(cardholder data environment)によるNW制御
+- FWアクセス制限、セキュアな通信、認証機構、強固な暗号化を用いたデータ暗号化鍵、鍵暗号化鍵による暗号化など
+- Android Pay/Apple Pay
+  - イシュアーを介したTokenization処理を活用したスマホ決済
+  - 端末にカード番号は残らず、トークン化された番号形式が保存される
+- Q&A
+  - tokenの失効させるフローは?
+    - API keyとセットでないと使えない前提
+    - Device Account Numberがもれるとどうなるか？token単体で利用できないのではという見解
+  - 実装によって脆弱なtokenができたりすると思うが、何か実装の基準みたいなものは?
+    - PCI-DSSに基づいた実装と、カード番号と発行させる実装を扱う環境を完全に分けている
+  - DANはDevice固有?
+    - Device固有だが、クレカのCVCのような認証機構によってダイナミックスが担保される?
+  - Identity界隈の人たちが言っているTokenizationとApple PayにおけるTokenizationは別???
